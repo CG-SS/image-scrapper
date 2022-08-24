@@ -24,6 +24,7 @@ func main() {
 		"image-filter",
 		&argparse.Options{Required: false, Help: "What formats to ignore. Default none. Options: " + strings.Join(img_formats.AllFormatsString(), ",")},
 	)
+	verbose := parser.Flag("v", "verbose", &argparse.Options{Required: false, Help: "If present, will enable logging."})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -53,10 +54,15 @@ func main() {
 		}
 	}
 
+	var infoLog *log.Logger
+	if *verbose {
+		infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	}
+
 	scrapper.Init(&config.AppConfig{
 		OutputDir:         *rawOutputDir,
 		URL:               websiteUrl,
-		InfoLog:           log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+		InfoLog:           infoLog,
 		ImageFormatFilter: imgFormatFilter,
 	})
 	scrapper.Run()
