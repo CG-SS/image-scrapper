@@ -11,19 +11,33 @@ const (
 	AI
 	INDD
 	RAW
+	PNG
+	SVG
 	UNKNOWN
 )
 
 func AllFormatsString() []string {
-	return []string{
-		JPEG.String(),
-		JPG.String(),
-		GIF.String(),
-		TIFF.String(),
-		PSD.String(),
-		AI.String(),
-		INDD.String(),
-		RAW.String(),
+	var fmtString []string
+
+	for _, format := range AllFormats() {
+		fmtString = append(fmtString, format.String())
+	}
+
+	return fmtString
+}
+
+func AllFormats() []ImageFormat {
+	return []ImageFormat{
+		JPEG,
+		JPG,
+		GIF,
+		TIFF,
+		PSD,
+		AI,
+		INDD,
+		RAW,
+		SVG,
+		PNG,
 	}
 }
 
@@ -45,6 +59,10 @@ func (i ImageFormat) String() string {
 		return "INDD"
 	case RAW:
 		return "RAW"
+	case SVG:
+		return "SVG"
+	case PNG:
+		return "PNG"
 	}
 	return "Unknown"
 }
@@ -67,6 +85,10 @@ func ParseImageFormat(s string) ImageFormat {
 		return INDD
 	case "RAW":
 		return RAW
+	case "SVG":
+		return SVG
+	case "PNG":
+		return PNG
 	}
 	return UNKNOWN
 }
