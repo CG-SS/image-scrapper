@@ -10,5 +10,6 @@ type AppConfig struct {
 	OutputDir         string
 	URL               *url.URL
 	InfoLog           *log.Logger
+	ErrorLog          *log.Logger
 	ImageFormatFilter []img_formats.ImageFormat
 }
