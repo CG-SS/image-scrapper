@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/akamensky/argparse"
 	"image-scrapper/internal/config"
+	"image-scrapper/internal/helpers"
 	"image-scrapper/internal/img_formats"
 	"image-scrapper/internal/scrapper"
 	"log"
@@ -22,7 +23,7 @@ func main() {
 	rawImgFormatFilter := parser.StringList(
 		"f",
 		"image-filter",
-		&argparse.Options{Required: false, Help: "What formats to ignore. Default none. Options: " + strings.Join(img_formats.AllFormatsString(), ",")},
+		&argparse.Options{Required: false, Help: "What formats to include. Default all. Options: " + strings.Join(img_formats.AllFormatsString(), ",")},
 	)
 	verbose := parser.Flag("v", "verbose", &argparse.Options{Required: false, Help: "If present, will enable logging."})
 
@@ -32,10 +33,12 @@ func main() {
 		return
 	}
 
-	fileInfo, err := os.Stat(*rawOutputDir)
-	if err != nil || !fileInfo.IsDir() {
-		fmt.Print(parser.Usage(err))
-		return
+	if !helpers.FileExists(*rawOutputDir) {
+		err := os.Mkdir(*rawOutputDir, 0777)
+		if err != nil {
+			fmt.Print(parser.Usage(err))
+			return
+		}
 	}
 
 	websiteUrl, err := url.Parse(*rawWebsiteUrl)
@@ -52,17 +55,21 @@ func main() {
 				imgFormatFilter = append(imgFormatFilter, parsedFormat)
 			}
 		}
+	} else {
+		imgFormatFilter = img_formats.AllFormats()
 	}
 
-	var infoLog *log.Logger
+	var infoLog, errorLog *log.Logger
 	if *verbose {
 		infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+		errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	}
 
 	scrapper.Init(&config.AppConfig{
 		OutputDir:         *rawOutputDir,
 		URL:               websiteUrl,
 		InfoLog:           infoLog,
+		ErrorLog:          errorLog,
 		ImageFormatFilter: imgFormatFilter,
 	})
 	scrapper.Run()
